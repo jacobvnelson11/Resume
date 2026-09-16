@@ -3,6 +3,7 @@ import Layout from "./components/Layout";
 import ReviewQueue from "./pages/ReviewQueue";
 import ApplicationDetail from "./pages/ApplicationDetail";
 import Tracker from "./pages/Tracker";
+import BaseResumeEditor from "./pages/BaseResumeEditor";
 
 export default function App() {
   return (
@@ -11,6 +12,7 @@ export default function App() {
         <Route path="/" element={<ReviewQueue />} />
         <Route path="/applications/:id" element={<ApplicationDetail />} />
         <Route path="/tracker" element={<Tracker />} />
+        <Route path="/resume" element={<BaseResumeEditor />} />
       </Route>
     </Routes>
   );

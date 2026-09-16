@@ -27,6 +27,9 @@ export default function Layout() {
               <NavLink to="/tracker" className={linkClass}>
                 Tracker
               </NavLink>
+              <NavLink to="/resume" className={linkClass}>
+                Base Resume
+              </NavLink>
             </nav>
           </div>
           {stats && (
