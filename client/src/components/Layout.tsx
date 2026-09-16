@@ -22,20 +22,20 @@ export default function Layout() {
             <span className="font-semibold text-slate-800">Job Application Assistant</span>
             <nav className="flex gap-1">
               <NavLink to="/" end className={linkClass}>
-                Review Queue
+                Find Jobs
               </NavLink>
               <NavLink to="/tracker" className={linkClass}>
-                Tracker
+                My Applications
               </NavLink>
               <NavLink to="/resume" className={linkClass}>
-                Base Resume
+                My Resume
               </NavLink>
             </nav>
           </div>
           {stats && (
             <div className="text-sm text-slate-600">
               <span className="font-semibold text-brand-700">{stats.reviewedToday}</span> /{" "}
-              {stats.target} reviewed today
+              {stats.target} applied today
             </div>
           )}
         </div>

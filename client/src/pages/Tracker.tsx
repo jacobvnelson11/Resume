@@ -4,10 +4,10 @@ import { api } from "../api";
 import type { Application, ApplicationStatus } from "../types";
 
 const COLUMNS: { status: ApplicationStatus; label: string }[] = [
-  { status: "saved", label: "Saved" },
-  { status: "drafted", label: "Drafted" },
-  { status: "submitted", label: "Submitted" },
-  { status: "response", label: "Response" },
+  { status: "saved", label: "New" },
+  { status: "drafted", label: "Ready to Send" },
+  { status: "submitted", label: "Applied" },
+  { status: "response", label: "Heard Back" },
   { status: "interview", label: "Interview" },
   { status: "closed", label: "Closed" },
 ];
@@ -27,7 +27,7 @@ export default function Tracker() {
 
   return (
     <div>
-      <h1 className="text-xl font-semibold text-slate-900 mb-4">Application Tracker</h1>
+      <h1 className="text-xl font-semibold text-slate-900 mb-4">My Applications</h1>
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3">
         {COLUMNS.map((col) => {
           const items = applications.filter((a) => a.status === col.status);

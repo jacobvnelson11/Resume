@@ -2,14 +2,15 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { api } from "../api";
 import type { ApplicationDetail as ApplicationDetailType, ApplicationStatus } from "../types";
+import { getMatchInfo } from "../utils/match";
 
-const STATUS_OPTIONS: ApplicationStatus[] = [
-  "saved",
-  "drafted",
-  "submitted",
-  "response",
-  "interview",
-  "closed",
+const STATUS_OPTIONS: { value: ApplicationStatus; label: string }[] = [
+  { value: "saved", label: "New" },
+  { value: "drafted", label: "Ready to Send" },
+  { value: "submitted", label: "Applied" },
+  { value: "response", label: "Heard Back" },
+  { value: "interview", label: "Interview" },
+  { value: "closed", label: "Closed" },
 ];
 
 export default function ApplicationDetail() {
@@ -82,6 +83,7 @@ export default function ApplicationDetail() {
   if (!application) return <p className="text-red-600">{error ?? "Application not found"}</p>;
 
   const { job } = application;
+  const match = getMatchInfo(job.fitScore);
 
   return (
     <div className="max-w-3xl">
@@ -101,16 +103,19 @@ export default function ApplicationDetail() {
             className="border rounded-md px-2 py-1 text-sm"
           >
             {STATUS_OPTIONS.map((s) => (
-              <option key={s} value={s}>
-                {s}
+              <option key={s.value} value={s.value}>
+                {s.label}
               </option>
             ))}
           </select>
         </div>
-        <div className="mt-3 flex gap-4 text-xs text-slate-500">
-          <span>Fit score: {job.fitScore}</span>
-          <span>Tier: {job.tier}</span>
-          {job.salaryMin != null && <span>${job.salaryMin.toLocaleString()}+</span>}
+        <div className="mt-3 flex items-center gap-3 text-xs">
+          <span className={`px-2 py-1 rounded-full font-medium ${match.color}`}>
+            {job.fitScore}% match — {match.label.toLowerCase()}
+          </span>
+          {job.salaryMin != null && (
+            <span className="text-slate-500">${job.salaryMin.toLocaleString()}+ / year</span>
+          )}
         </div>
       </div>
 
