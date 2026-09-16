@@ -17,6 +17,7 @@
     "db:generate": "npm run db:generate -w server",
     "db:migrate": "npm run db:migrate -w server",
     "db:seed": "npm run db:seed -w server",
-    "ingest": "npm run ingest -w server"
+    "ingest": "npm run ingest -w server",
+    "replit": "npm install && npm run build && npm run db:migrate && npm run db:seed && npm run start"
   }
 }
