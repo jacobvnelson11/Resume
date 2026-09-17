@@ -42,4 +42,13 @@ export const api = {
     request<BaseResume>("/api/base-resume", { method: "PATCH", body: JSON.stringify(data) }),
 
   runIngest: () => request<{ fetched: number; kept: number }>("/api/ingest/run", { method: "POST" }),
+
+  runDailyBatch: () =>
+    request<{
+      fetched: number;
+      kept: number;
+      processed: number;
+      succeeded: number;
+      failed: { job: string; error: string }[];
+    }>("/api/batch/run-daily", { method: "POST" }),
 };

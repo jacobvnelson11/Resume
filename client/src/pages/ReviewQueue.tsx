@@ -14,6 +14,8 @@ export default function ReviewQueue() {
   const [preparingCount, setPreparingCount] = useState(0);
   const [draftWarning, setDraftWarning] = useState<string | null>(null);
   const warnedOnce = useRef(false);
+  const [batchRunning, setBatchRunning] = useState(false);
+  const [batchResult, setBatchResult] = useState<string | null>(null);
 
   async function load() {
     setLoading(true);
@@ -82,6 +84,25 @@ export default function ReviewQueue() {
     }
   }
 
+  async function handleRunBatch() {
+    setBatchRunning(true);
+    setBatchResult(null);
+    setError(null);
+    try {
+      const result = await api.runDailyBatch();
+      setBatchResult(
+        `Done! Looked at ${result.processed} job${result.processed === 1 ? "" : "s"} and made ${result.succeeded} resume${
+          result.succeeded === 1 ? "" : "s"
+        }${result.failed.length > 0 ? ` (${result.failed.length} couldn't be prepared)` : ""}. Check "My Applications" to review and send them.`,
+      );
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't run today's batch");
+    } finally {
+      setBatchRunning(false);
+    }
+  }
+
   const visibleStack = jobs.slice(0, 3);
 
   return (
@@ -102,8 +123,28 @@ export default function ReviewQueue() {
         </button>
       </div>
 
+      <div className="mb-4 p-4 rounded-lg border border-brand-200 bg-brand-50 flex items-center justify-between gap-3">
+        <div>
+          <p className="text-sm font-medium text-brand-800">Let the agent do it for you</p>
+          <p className="text-xs text-brand-700">
+            Automatically finds today's best-fitting jobs and writes a resume + cover letter for each one.
+            This also runs by itself every day.
+          </p>
+        </div>
+        <button
+          onClick={handleRunBatch}
+          disabled={batchRunning}
+          className="shrink-0 px-4 py-2 text-sm rounded-md bg-brand-600 text-white hover:bg-brand-700 disabled:opacity-50"
+        >
+          {batchRunning ? "Working…" : "Run today's batch"}
+        </button>
+      </div>
+      {batchResult && (
+        <div className="mb-4 p-3 rounded-md bg-emerald-50 text-emerald-800 text-sm">{batchResult}</div>
+      )}
+
       <p className="text-center text-sm text-slate-400 mb-4">
-        Swipe a card right (or tap ✓) to apply. Swipe left (or tap ✕) to skip.
+        Or browse one at a time below: swipe a card right (or tap ✓) to apply, left (or tap ✕) to skip.
       </p>
 
       {preparingCount > 0 && (
