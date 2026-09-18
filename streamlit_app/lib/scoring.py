@@ -41,25 +41,6 @@ CREDENTIAL_EXCLUDE_RE = re.compile(
     r"\b(cpa\b|registered nurse|rn license|professional engineer|p\.?e\.? license)\b", re.I
 )
 
-SEED_KEYWORDS = [
-    "digital marketing",
-    "marketing automation",
-    "social media marketing",
-    "social media manager",
-    "e-commerce marketing",
-    "ecommerce marketing",
-    "crm marketing",
-    "business development representative",
-    "inside sales",
-    "account executive",
-    "sales development representative",
-    "marketing coordinator",
-]
-
-
-def matches_seed_keywords(title: str) -> bool:
-    t = title.lower()
-    return any(k in t for k in SEED_KEYWORDS)
 
 
 def classify_tier(title: str) -> str:

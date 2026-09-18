@@ -65,7 +65,9 @@ def fetch_remoteok_jobs() -> list[dict]:
                 "url": f"https://remoteok.com{job['url']}" if job.get("url") else f"https://remoteok.com/remote-jobs/{job['id']}",
                 "remote_text": "remote",
                 "description": f"{job.get('description', '')} {', '.join(job.get('tags', []))}".strip(),
-                "salary_min": job.get("salary_min"),
+                # RemoteOK returns 0 (not null) for "salary not disclosed" -- treat that as unknown,
+                # not as a literal $0 salary that would otherwise fail every floor check.
+                "salary_min": job.get("salary_min") or None,
                 "posted_at": job.get("date"),
             }
         )

@@ -92,8 +92,6 @@ if st.button("🔍 Find new jobs", type="primary"):
     for job in all_jobs:
         if (job["source"], job["external_id"]) in seen:
             continue
-        if not scoring.matches_seed_keywords(job["title"]):
-            continue
         if not scoring.is_remote(job["remote_text"], job["description"]):
             continue
         tier = scoring.classify_tier(job["title"])
