@@ -1,5 +1,6 @@
 output/
 data/seen_jobs.json
+data/current_batch.json
 __pycache__/
 *.pyc
 .venv/

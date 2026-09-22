@@ -87,9 +87,16 @@ seen_jobs = storage.load_seen_jobs()
 st.sidebar.write(f"{len(seen_jobs)} jobs already suggested so far -- these won't show up again.")
 if st.sidebar.button("Reset job history (show everything again)"):
     storage.reset_seen_jobs()
+    storage.clear_current_batch()
     st.session_state.pop("job_results", None)
     st.session_state.pop("generated", None)
     st.sidebar.success("Cleared.")
+    st.rerun()
+if st.session_state.get("job_results") and st.sidebar.button("Clear current list (keeps job history)"):
+    storage.clear_current_batch()
+    st.session_state.pop("job_results", None)
+    st.session_state.pop("generated", None)
+    st.sidebar.success("List cleared. Search again for a fresh batch.")
     st.rerun()
 
 st.sidebar.divider()
@@ -127,6 +134,15 @@ with st.sidebar.expander("Edit my resume"):
         base_for_edit["certifications"] = [s.strip() for s in new_certs.split(",") if s.strip()]
         storage.save_base_resume(base_for_edit)
         st.success("Saved.")
+
+# Recover an in-progress batch from disk -- e.g. after closing/reopening the
+# app -- since the jobs in it are already marked "seen" and won't resurface
+# on their own otherwise.
+if "job_results" not in st.session_state:
+    loaded_results, loaded_generated = storage.load_current_batch()
+    if loaded_results:
+        st.session_state["job_results"] = loaded_results
+        st.session_state["generated"] = loaded_generated
 
 # ------------------------------------------------------------- Search step --
 
@@ -172,8 +188,14 @@ if st.button("🔍 Find new jobs", type="primary"):
         seen.add((job["source"], job["external_id"]))
     storage.save_seen_jobs(seen)
 
-    st.session_state["job_results"] = selected
+    # Add to (not replace) whatever's already showing, so searching again never
+    # silently drops jobs you haven't generated a resume for yet.
+    existing_results = st.session_state.get("job_results", [])
+    existing_keys = {(j["source"], j["external_id"]) for j in existing_results}
+    newly_added = [j for j in selected if (j["source"], j["external_id"]) not in existing_keys]
+    st.session_state["job_results"] = existing_results + newly_added
     st.session_state.setdefault("generated", {})
+    storage.save_current_batch(st.session_state["job_results"], st.session_state["generated"])
 
 # ----------------------------------------------------------------- Results --
 
@@ -203,6 +225,7 @@ if "job_results" in st.session_state:
                 job_key = (job["source"], job["external_id"])
                 progress.progress(i / len(pending), text=f"Writing {i + 1} of {len(pending)}: {job['title']} at {job['company']}")
                 generated[job_key] = generate_for_job(job, base, output_dir, has_api_key)
+                storage.save_current_batch(results, generated)  # save after each so progress survives an interruption
             progress.progress(1.0, text="Done!")
             st.rerun()
 
@@ -244,6 +267,7 @@ if "job_results" in st.session_state:
                     st.error(f"Couldn't generate a draft: {entry['error']}")
                     if st.button("Try again", key=f"retry-{job_key}"):
                         generated.pop(job_key, None)
+                        storage.save_current_batch(results, generated)
                         st.rerun()
                 else:
                     label = "✍️ Write a tailored resume + cover letter for this job" if has_api_key else "✍️ Write a resume + cover letter for this job (free, basic version)"
@@ -252,4 +276,5 @@ if "job_results" in st.session_state:
                         os.makedirs(output_dir, exist_ok=True)
                         with st.spinner("Writing..."):
                             generated[job_key] = generate_for_job(job, base, output_dir, has_api_key)
+                        storage.save_current_batch(results, generated)
                         st.rerun()
