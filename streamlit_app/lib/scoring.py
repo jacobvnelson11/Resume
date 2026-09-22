@@ -35,12 +35,32 @@ STRETCH_TITLE_KEYWORDS = [
 ]
 
 SENIORITY_EXCLUDE_RE = re.compile(
-    r"\b(senior|sr\.?|director|vp\b|vice president|principal|staff|head of|chief)\b", re.I
+    r"\b(senior|sr\.?|director|vp\b|vice president|principal|staff|head of|chief|lead\b)\b", re.I
 )
 CREDENTIAL_EXCLUDE_RE = re.compile(
     r"\b(cpa\b|registered nurse|rn license|professional engineer|p\.?e\.? license)\b", re.I
 )
 
+# Matches phrases like "5+ years of experience", "3-5 years experience", "7 years exp."
+MIN_YEARS_RE = re.compile(
+    r"(\d{1,2})\s*\+?\s*(?:-\s*\d{1,2}\s*)?\+?\s*years?\s*(?:of\s+)?(?:relevant\s+|professional\s+)?(?:experience|exp\.?)\b",
+    re.I,
+)
+
+
+def required_years_experience(description: str):
+    """Highest stated minimum-years-of-experience requirement found in a posting, or None."""
+    matches = MIN_YEARS_RE.findall(description or "")
+    if not matches:
+        return None
+    return max(int(m) for m in matches)
+
+
+def exceeds_experience_requirement(description: str, max_years: int) -> bool:
+    """Screens out postings that explicitly ask for more experience than Jacob has --
+    title wording alone (e.g. no "Senior" in the title) often doesn't catch this."""
+    required = required_years_experience(description)
+    return required is not None and required > max_years
 
 
 def classify_tier(title: str) -> str:
@@ -60,13 +80,27 @@ def is_remote(remote_text: str, description: str) -> bool:
 
 
 def meets_salary_floor(salary_min, title: str, tier: str, floor: int) -> bool:
-    """Hard salary filter (PRD section 4): keep stated salaries >= floor, or
-    missing-salary listings whose title doesn't look like it's below the floor."""
+    """Hard salary filter: keep stated salaries >= floor, or missing-salary listings
+    that aren't an internship/volunteer/part-time role. Entry-level full-time roles
+    are fine -- Jacob's explicitly okay with those as long as pay clears the floor."""
     if salary_min is not None:
         return salary_min >= floor
     t = title.lower()
-    looks_sub_floor = bool(re.search(r"\bintern(ship)?\b|\bentry[- ]level\b|\bpart[- ]time\b|\bvolunteer\b", t))
+    looks_sub_floor = bool(re.search(r"\bintern(ship)?\b|\bpart[- ]time\b|\bvolunteer\b", t))
     return tier != "excluded" and not looks_sub_floor
+
+
+BENEFITS_RE = re.compile(
+    r"health insurance|medical,? dental|dental,? vision|401\(?k\)?|paid time off|\bpto\b|"
+    r"unlimited pto|equity|stock options|parental leave|life insurance|benefits package|"
+    r"\bbenefits\b",
+    re.I,
+)
+
+
+def mentions_benefits(description: str) -> bool:
+    """Informational only, not a hard filter -- shown per job so Jacob can judge for himself."""
+    return bool(BENEFITS_RE.search(description or ""))
 
 
 def compute_fit_score(description: str, tier: str, base_skills, salary_min, salary_floor: int) -> int:

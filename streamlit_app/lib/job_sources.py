@@ -112,10 +112,50 @@ def fetch_weworkremotely_jobs() -> list[dict]:
     return jobs
 
 
+def fetch_remotive_jobs() -> list[dict]:
+    """Remotive's free API has dedicated marketing/sales categories (unlike RemoteOK's
+    all-categories firehose), which is where most of our real match volume comes from."""
+    jobs = []
+    for category in ["marketing", "sales-business"]:
+        try:
+            resp = requests.get(
+                f"https://remotive.com/api/remote-jobs?category={category}",
+                timeout=15,
+            )
+            resp.raise_for_status()
+        except Exception as e:
+            print(f"[remotive] category '{category}' fetch failed: {e}")
+            continue
+
+        data = resp.json()
+        for job in data.get("jobs", []):
+            salary_min = None
+            salary_text = job.get("salary") or ""
+            m = re.search(r"\$(\d{2,3}),?(\d{3})", salary_text)
+            if m:
+                salary_min = int(m.group(1) + m.group(2))
+
+            jobs.append(
+                {
+                    "external_id": str(job["id"]),
+                    "title": job["title"],
+                    "company": job.get("company_name", "Unknown"),
+                    "source": "remotive",
+                    "url": job.get("url"),
+                    "remote_text": "remote",
+                    "description": strip_html(job.get("description", "")),
+                    "salary_min": salary_min,
+                    "posted_at": job.get("publication_date"),
+                }
+            )
+    return jobs
+
+
 def fetch_all_jobs(greenhouse_tokens: list[str]) -> list[dict]:
     jobs = []
     jobs += fetch_remoteok_jobs()
     jobs += fetch_weworkremotely_jobs()
+    jobs += fetch_remotive_jobs()
     for token in greenhouse_tokens:
         jobs += fetch_greenhouse_jobs(token)
     return jobs
