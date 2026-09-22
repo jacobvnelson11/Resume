@@ -3,6 +3,7 @@ import json
 import re
 
 import feedparser
+import ftfy
 import requests
 
 
@@ -166,4 +167,12 @@ def fetch_all_jobs(greenhouse_tokens: list[str]) -> list[dict]:
     jobs += fetch_remotive_jobs()
     for token in greenhouse_tokens:
         jobs += fetch_greenhouse_jobs(token)
+
+    # Belt-and-suspenders text cleanup: some feeds/APIs mangle encoding in ways
+    # that survive per-source fixes (curly quotes/dashes becoming "â€™" etc.).
+    for job in jobs:
+        job["title"] = ftfy.fix_text(job["title"])
+        job["company"] = ftfy.fix_text(job["company"])
+        job["description"] = ftfy.fix_text(job["description"])
+
     return jobs

@@ -198,10 +198,10 @@ if "job_results" in st.session_state:
             with st.expander(f"{job['fit_score']}% match -- {job['title']} at {job['company']} ({job['tier']} fit){badge}"):
                 salary_text = f"${job['salary_min']:,}+/year" if job.get("salary_min") else "salary not listed"
                 st.write(f"**Source:** {job['source']}  |  **Salary:** {salary_text}")
-                st.markdown(
-                    f"**How to apply:** [Open the job posting]({job['url']}) and submit through the "
-                    "company's own site. The resume PDF/DOCX below are formatted to read cleanly in "
-                    "applicant tracking systems (single column, no tables, standard section headings)."
+                st.link_button("🔗 Apply on company site", job["url"])
+                st.caption(
+                    "Resume PDF/DOCX below are formatted to read cleanly in applicant tracking systems "
+                    "(single column, no tables, standard section headings) -- attach them on that page."
                 )
 
                 entry = generated.get(job_key)
