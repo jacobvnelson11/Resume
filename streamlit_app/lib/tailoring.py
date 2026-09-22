@@ -108,3 +108,33 @@ def generate_tailored_application(
     parsed = json.loads(_extract_json(text))
     _validate_against_base_resume(parsed, base_resume)
     return parsed
+
+
+def generate_template_application(
+    job_title: str,
+    job_company: str,
+    job_description: str,
+    base_resume: dict,
+) -> dict:
+    """No-API-key fallback: your resume as-is (no per-job bullet reordering),
+    plus a short, deterministic cover letter that calls out whichever of your
+    skills the posting itself mentions. Not AI-tailored -- add an Anthropic
+    API key in the sidebar for a version written specifically for each job."""
+    desc_lower = (job_description or "").lower()
+    matched_skills = [s for s in base_resume["skills"] if s.lower() in desc_lower][:3]
+    skills_phrase = ", ".join(matched_skills) if matched_skills else ", ".join(base_resume["skills"][:3])
+
+    experience = [
+        {"company": e["company"], "title": e["title"], "bullets": list(e["bullets"])}
+        for e in base_resume["experience"]
+    ]
+
+    cover_letter = (
+        f"Hi,\n\n"
+        f"I'm applying for the {job_title} role at {job_company}. {base_resume['summary']}\n\n"
+        f"Relevant experience includes {skills_phrase}.\n\n"
+        f"Happy to share more or answer any questions -- you can reach me at jacob.v.nelson11@gmail.com.\n\n"
+        f"Thanks for your time,\nJacob V. Nelson"
+    )
+
+    return {"summary": base_resume["summary"], "experience": experience, "coverLetter": cover_letter}
