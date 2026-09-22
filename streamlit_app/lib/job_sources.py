@@ -1,8 +1,16 @@
 """Job connectors -- official, documented APIs/feeds only (PRD section 9), no scraping."""
+import json
 import re
 
 import feedparser
 import requests
+
+
+def _json(resp: requests.Response):
+    """requests' r.json() can mis-detect encoding and mangle non-ASCII characters
+    (curly quotes, accents, em dashes) when a server doesn't send a charset header.
+    Decoding the raw bytes as UTF-8 explicitly avoids garbled titles/descriptions."""
+    return json.loads(resp.content.decode("utf-8", errors="replace"))
 
 
 def strip_html(html: str) -> str:
@@ -20,7 +28,7 @@ def fetch_greenhouse_jobs(board_token: str) -> list[dict]:
         print(f"[greenhouse] board '{board_token}' fetch failed: {e}")
         return []
 
-    data = resp.json()
+    data = _json(resp)
     jobs = []
     for job in data.get("jobs", []):
         jobs.append(
@@ -51,7 +59,7 @@ def fetch_remoteok_jobs() -> list[dict]:
         print(f"[remoteok] fetch failed: {e}")
         return []
 
-    data = resp.json()
+    data = _json(resp)
     jobs = []
     for job in data:
         if not job.get("id") or not job.get("position") or job.get("legal"):
@@ -127,7 +135,7 @@ def fetch_remotive_jobs() -> list[dict]:
             print(f"[remotive] category '{category}' fetch failed: {e}")
             continue
 
-        data = resp.json()
+        data = _json(resp)
         for job in data.get("jobs", []):
             salary_min = None
             salary_text = job.get("salary") or ""

@@ -127,8 +127,12 @@ if st.button("🔍 Find new jobs", type="primary"):
         all_jobs = job_sources.fetch_all_jobs(greenhouse_tokens)
 
     candidates = []
+    added_keys = set()
     for job in all_jobs:
-        if (job["source"], job["external_id"]) in seen:
+        job_key = (job["source"], job["external_id"])
+        # Remotive can return the same listing under more than one category
+        # (e.g. both "marketing" and "sales-business"), so de-dupe within this run too.
+        if job_key in seen or job_key in added_keys:
             continue
         if not scoring.is_remote(job["remote_text"], job["description"]):
             continue
@@ -143,6 +147,7 @@ if st.button("🔍 Find new jobs", type="primary"):
         job["fit_score"] = scoring.compute_fit_score(job["description"], tier, base["skills"], job["salary_min"], salary_floor)
         job["has_benefits"] = scoring.mentions_benefits(job["description"])
         candidates.append(job)
+        added_keys.add(job_key)
 
     candidates.sort(key=lambda j: j["fit_score"], reverse=True)
     selected = candidates[:num_jobs]
