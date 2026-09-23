@@ -83,10 +83,13 @@ company_tokens_input = st.sidebar.text_input(
 max_post_age_hours = st.sidebar.number_input(
     "Only show jobs posted within this many hours",
     min_value=1,
-    max_value=720,
-    value=72,
-    step=1,
-    help="Postings with no usable date from the source are kept regardless, rather than dropped.",
+    max_value=1440,
+    value=336,
+    step=24,
+    help='Default is 14 days (336 hours) -- a middle ground between freshness and volume. RemoteOK '
+    "especially tends to have listings stay live well past 30 days without being reposted, so a "
+    "strict 24-72 hour window can drop to near-zero matches on an ordinary day. Postings with no "
+    "usable date from the source are kept regardless, rather than dropped.",
 )
 
 st.sidebar.divider()
