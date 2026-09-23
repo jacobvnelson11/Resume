@@ -163,7 +163,10 @@ def fetch_remotive_jobs() -> list[dict]:
 def fetch_all_jobs(greenhouse_tokens: list[str]) -> list[dict]:
     jobs = []
     jobs += fetch_remoteok_jobs()
-    jobs += fetch_weworkremotely_jobs()
+    # We Work Remotely dropped out per Jacob's report: several of its listings
+    # require a paid WWR subscription just to reach the apply step, which
+    # defeats the point. fetch_weworkremotely_jobs() is left in place below in
+    # case that changes, but it's not called here.
     jobs += fetch_remotive_jobs()
     for token in greenhouse_tokens:
         jobs += fetch_greenhouse_jobs(token)
