@@ -164,6 +164,8 @@ if st.button("🔍 Find new jobs", type="primary"):
             continue
         if not scoring.is_remote(job["remote_text"], job["description"]):
             continue
+        if scoring.is_region_restricted(job["title"]):
+            continue
         tier = scoring.classify_tier(job["title"])
         if tier == "excluded":
             continue

@@ -41,6 +41,21 @@ CREDENTIAL_EXCLUDE_RE = re.compile(
     r"\b(cpa\b|registered nurse|rn license|professional engineer|p\.?e\.? license)\b", re.I
 )
 
+# Roles explicitly scoped to a non-US region -- these want candidates already
+# authorized to work there, so a US-based applicant isn't a realistic fit even
+# though the listing itself says "remote."
+REGION_RESTRICTED_RE = re.compile(
+    r"\b(DACH|Nordics?|EMEA|APAC|LATAM|ANZ|Benelux|"
+    r"UK[\s/-]?(?:based|only|ireland)?|United Kingdom|Ireland|"
+    r"Japan|Germany|France|Spain|Italy|Australia|"
+    r"Central\s*&?\s*East(?:ern)?\s*Europe)\b",
+    re.I,
+)
+
+
+def is_region_restricted(title: str) -> bool:
+    return bool(REGION_RESTRICTED_RE.search(title or ""))
+
 # Matches phrases like "5+ years of experience", "3-5 years experience", "7 years exp."
 MIN_YEARS_RE = re.compile(
     r"(\d{1,2})\s*\+?\s*(?:-\s*\d{1,2}\s*)?\+?\s*years?\s*(?:of\s+)?(?:relevant\s+|professional\s+)?(?:experience|exp\.?)\b",
