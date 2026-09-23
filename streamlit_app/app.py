@@ -75,10 +75,10 @@ max_years_experience = st.sidebar.number_input(
     step=1,
     help='Entry-level roles are always included -- this only screens out postings that explicitly say e.g. "7+ years experience."',
 )
-greenhouse_tokens_input = st.sidebar.text_input(
+company_tokens_input = st.sidebar.text_input(
     "Specific companies to include (optional)",
     value="",
-    help='Comma-separated Greenhouse board tokens, e.g. "gitlab, doist". Found in a company\'s careers URL: boards.greenhouse.io/<token>',
+    help='Comma-separated company names, e.g. "gitlab, doist". Checked against Greenhouse, Lever, and Ashby -- whichever the company actually uses. A wrong guess just returns nothing, no harm in trying.',
 )
 max_post_age_hours = st.sidebar.number_input(
     "Only show jobs posted within this many hours",
@@ -157,10 +157,10 @@ if "job_results" not in st.session_state:
 if st.button("🔍 Find new jobs", type="primary"):
     seen = storage.load_seen_jobs()
     base = storage.load_base_resume()
-    greenhouse_tokens = [t.strip() for t in greenhouse_tokens_input.split(",") if t.strip()]
+    company_tokens = [t.strip() for t in company_tokens_input.split(",") if t.strip()]
 
-    with st.spinner("Searching RemoteOK, Remotive" + (", and Greenhouse" if greenhouse_tokens else "") + "..."):
-        all_jobs = job_sources.fetch_all_jobs(greenhouse_tokens)
+    with st.spinner("Searching RemoteOK, Remotive" + (f", and {len(company_tokens)} compan{'y' if len(company_tokens) == 1 else 'ies'}" if company_tokens else "") + "..."):
+        all_jobs = job_sources.fetch_all_jobs(company_tokens)
 
     candidates = []
     added_keys = set()

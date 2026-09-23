@@ -1,6 +1,7 @@
 """Job connectors -- official, documented APIs/feeds only (PRD section 9), no scraping."""
 import json
 import re
+from datetime import datetime, timezone
 
 import feedparser
 import ftfy
@@ -43,6 +44,89 @@ def fetch_greenhouse_jobs(board_token: str) -> list[dict]:
                 "description": strip_html(job.get("content", "")),
                 "salary_min": None,
                 "posted_at": job.get("updated_at"),
+            }
+        )
+    return jobs
+
+
+def fetch_lever_jobs(company_token: str) -> list[dict]:
+    """Lever's public postings API -- like Greenhouse, this is the company's
+    own hosted application page (jobs.lever.co/<company>/<id>), not an
+    aggregator, so it's always a direct apply."""
+    url = f"https://api.lever.co/v0/postings/{company_token}?mode=json"
+    try:
+        resp = requests.get(url, timeout=15)
+        resp.raise_for_status()
+    except Exception as e:
+        print(f"[lever] company '{company_token}' fetch failed: {e}")
+        return []
+
+    data = _json(resp)
+    if not isinstance(data, list):
+        return []
+
+    jobs = []
+    for job in data:
+        categories = job.get("categories") or {}
+        remote_text = job.get("workplaceType") or categories.get("location") or ""
+
+        posted_at = None
+        created_at = job.get("createdAt")
+        if created_at:
+            try:
+                posted_at = datetime.fromtimestamp(int(created_at) / 1000, tz=timezone.utc).isoformat()
+            except (ValueError, TypeError, OSError):
+                posted_at = None
+
+        jobs.append(
+            {
+                "external_id": str(job.get("id")),
+                "title": job.get("text", ""),
+                "company": company_token,
+                "source": "lever",
+                "url": job.get("hostedUrl") or job.get("applyUrl") or "",
+                "remote_text": remote_text,
+                "description": strip_html(job.get("descriptionPlain") or job.get("description") or ""),
+                "salary_min": None,
+                "posted_at": posted_at,
+            }
+        )
+    return jobs
+
+
+def fetch_ashby_jobs(company_token: str) -> list[dict]:
+    """Ashby's public job board API -- also the company's own hosted apply
+    page, no aggregator hop."""
+    url = f"https://api.ashbyhq.com/posting-api/job-board/{company_token}?includeCompensation=true"
+    try:
+        resp = requests.get(url, timeout=15)
+        resp.raise_for_status()
+    except Exception as e:
+        print(f"[ashby] company '{company_token}' fetch failed: {e}")
+        return []
+
+    data = _json(resp)
+    jobs = []
+    for job in data.get("jobs", []):
+        salary_min = None
+        comp_text = str(job.get("compensationTierSummary") or "")
+        m = re.search(r"\$(\d{2,3}),?(\d{3})", comp_text)
+        if m:
+            salary_min = int(m.group(1) + m.group(2))
+
+        remote_text = "remote" if job.get("isRemote") else (job.get("location") or "")
+
+        jobs.append(
+            {
+                "external_id": str(job.get("id")),
+                "title": job.get("title", ""),
+                "company": company_token,
+                "source": "ashby",
+                "url": job.get("jobUrl") or job.get("applyUrl") or "",
+                "remote_text": remote_text,
+                "description": strip_html(job.get("descriptionPlain") or job.get("descriptionHtml") or ""),
+                "salary_min": salary_min,
+                "posted_at": job.get("publishedAt"),
             }
         )
     return jobs
@@ -211,7 +295,7 @@ def fetch_jobicy_jobs() -> list[dict]:
     return jobs
 
 
-def fetch_all_jobs(greenhouse_tokens: list[str]) -> list[dict]:
+def fetch_all_jobs(company_tokens: list[str]) -> list[dict]:
     jobs = []
     jobs += fetch_remoteok_jobs()
     # We Work Remotely dropped out per Jacob's report: several of its listings
@@ -223,8 +307,15 @@ def fetch_all_jobs(greenhouse_tokens: list[str]) -> list[dict]:
     # Jobicy's own job page, not straight to the company's application, which
     # is the same one-extra-hop problem WWR had. fetch_jobicy_jobs() stays
     # defined below in case a direct-apply field shows up in their API later.
-    for token in greenhouse_tokens:
+
+    # Company name -> tried against all three ATS platforms, since we don't
+    # know upfront which one (if any) a given company uses. Each is the
+    # company's own hosted application page, so every hit is a guaranteed
+    # direct apply -- no aggregator hop to go wrong.
+    for token in company_tokens:
         jobs += fetch_greenhouse_jobs(token)
+        jobs += fetch_lever_jobs(token)
+        jobs += fetch_ashby_jobs(token)
 
     # Belt-and-suspenders text cleanup: some feeds/APIs mangle encoding in ways
     # that survive per-source fixes (curly quotes/dashes becoming "â€™" etc.).
