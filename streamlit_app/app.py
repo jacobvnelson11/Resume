@@ -86,10 +86,10 @@ max_post_age_hours = st.sidebar.number_input(
     max_value=1440,
     value=336,
     step=24,
-    help='Default is 14 days (336 hours) -- a middle ground between freshness and volume. RemoteOK '
-    "especially tends to have listings stay live well past 30 days without being reposted, so a "
-    "strict 24-72 hour window can drop to near-zero matches on an ordinary day. Postings with no "
-    "usable date from the source are kept regardless, rather than dropped.",
+    help="Default is 14 days (336 hours) -- a middle ground between freshness and volume. Some boards "
+    "have listings stay live for weeks without being reposted, so a strict 24-72 hour window can drop "
+    "to near-zero matches on an ordinary day. Postings with no usable date from the source are kept "
+    "regardless, rather than dropped.",
 )
 
 st.sidebar.divider()
@@ -162,7 +162,7 @@ if st.button("🔍 Find new jobs", type="primary"):
     base = storage.load_base_resume()
     company_tokens = [t.strip() for t in company_tokens_input.split(",") if t.strip()]
 
-    with st.spinner("Searching RemoteOK, Remotive" + (f", and {len(company_tokens)} compan{'y' if len(company_tokens) == 1 else 'ies'}" if company_tokens else "") + "..."):
+    with st.spinner("Searching Remotive" + (f", and {len(company_tokens)} compan{'y' if len(company_tokens) == 1 else 'ies'}" if company_tokens else "") + "..."):
         all_jobs = job_sources.fetch_all_jobs(company_tokens)
 
     candidates = []

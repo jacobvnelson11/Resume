@@ -310,11 +310,10 @@ def fetch_jobicy_jobs() -> list[dict]:
 
 def fetch_all_jobs(company_tokens: list[str]) -> list[dict]:
     jobs = []
-    jobs += fetch_remoteok_jobs()
-    # We Work Remotely dropped out per Jacob's report: several of its listings
-    # require a paid WWR subscription just to reach the apply step, which
-    # defeats the point. fetch_weworkremotely_jobs() is left in place below in
-    # case that changes, but it's not called here.
+    # RemoteOK dropped out per Jacob's report: every listing he tried routed
+    # through a paid RemoteOK application flow instead of a free direct apply.
+    # Same bar We Work Remotely and Jobicy failed. fetch_remoteok_jobs() stays
+    # defined below in case that changes.
     jobs += fetch_remotive_jobs()
     # Jobicy dropped out too per Jacob's report: its "url" field links to
     # Jobicy's own job page, not straight to the company's application, which
