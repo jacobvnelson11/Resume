@@ -65,26 +65,32 @@ def generate_for_job(job: dict, base: dict, output_dir: str, use_ai: bool) -> di
 
 st.sidebar.header("Search settings")
 
-num_jobs = st.sidebar.number_input("How many new jobs to find", min_value=1, max_value=200, value=40, step=5)
-salary_floor = st.sidebar.number_input("Minimum salary ($/year)", min_value=0, value=60000, step=5000)
+saved_settings = storage.load_settings()
+
+num_jobs = st.sidebar.number_input(
+    "How many new jobs to find", min_value=1, max_value=200, value=saved_settings.get("num_jobs", 40), step=5
+)
+salary_floor = st.sidebar.number_input(
+    "Minimum salary ($/year)", min_value=0, value=saved_settings.get("salary_floor", 60000), step=5000
+)
 max_years_experience = st.sidebar.number_input(
     "Skip jobs asking for more than this many years of experience",
     min_value=1,
     max_value=20,
-    value=5,
+    value=saved_settings.get("max_years_experience", 5),
     step=1,
     help='Entry-level roles are always included -- this only screens out postings that explicitly say e.g. "7+ years experience."',
 )
 company_tokens_input = st.sidebar.text_input(
     "Specific companies to include (optional)",
-    value="",
-    help='Comma-separated company names, e.g. "gitlab, doist". Checked against Greenhouse, Lever, and Ashby -- whichever the company actually uses. A wrong guess just returns nothing, no harm in trying.',
+    value=saved_settings.get("company_tokens_input", ""),
+    help='Comma-separated company names, e.g. "gitlab, doist". Checked against Greenhouse, Lever, and Ashby -- whichever the company actually uses. A wrong guess just returns nothing, no harm in trying. Remembered between runs.',
 )
 max_post_age_hours = st.sidebar.number_input(
     "Only show jobs posted within this many hours",
     min_value=1,
     max_value=1440,
-    value=336,
+    value=saved_settings.get("max_post_age_hours", 336),
     step=24,
     help="Default is 14 days (336 hours) -- a middle ground between freshness and volume. Some boards "
     "have listings stay live for weeks without being reposted, so a strict 24-72 hour window can drop "
@@ -113,7 +119,7 @@ if st.session_state.get("job_results") and st.sidebar.button("Clear current list
 st.sidebar.divider()
 st.sidebar.subheader("Resume writing")
 default_output = str(Path.cwd() / "output")
-output_dir = st.sidebar.text_input("Save resumes to this folder", value=default_output)
+output_dir = st.sidebar.text_input("Save resumes to this folder", value=saved_settings.get("output_dir", default_output))
 api_key_input = st.sidebar.text_input(
     "Anthropic API key (optional)",
     type="password",
@@ -161,6 +167,17 @@ if st.button("🔍 Find new jobs", type="primary"):
     seen = storage.load_seen_jobs()
     base = storage.load_base_resume()
     company_tokens = [t.strip() for t in company_tokens_input.split(",") if t.strip()]
+
+    storage.save_settings(
+        {
+            "num_jobs": num_jobs,
+            "salary_floor": salary_floor,
+            "max_years_experience": max_years_experience,
+            "company_tokens_input": company_tokens_input,
+            "max_post_age_hours": max_post_age_hours,
+            "output_dir": output_dir,
+        }
+    )
 
     with st.spinner("Searching Remotive, Himalayas, The Muse" + (f", and {len(company_tokens)} compan{'y' if len(company_tokens) == 1 else 'ies'}" if company_tokens else "") + "..."):
         all_jobs = job_sources.fetch_all_jobs(company_tokens)

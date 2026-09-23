@@ -9,6 +9,7 @@ DATA_DIR = APP_DIR / "data"
 SEEN_JOBS_PATH = DATA_DIR / "seen_jobs.json"
 BASE_RESUME_PATH = DATA_DIR / "base_resume.json"
 CURRENT_BATCH_PATH = DATA_DIR / "current_batch.json"
+SETTINGS_PATH = DATA_DIR / "settings.json"
 
 
 def load_seen_jobs() -> set[tuple[str, str]]:
@@ -59,6 +60,22 @@ def load_current_batch() -> tuple[list[dict], dict[tuple[str, str], dict]]:
 def clear_current_batch() -> None:
     if CURRENT_BATCH_PATH.exists():
         CURRENT_BATCH_PATH.unlink()
+
+
+def load_settings() -> dict:
+    """Search-settings that should survive restarting the app (company list,
+    filters, output folder) -- the Anthropic key is deliberately NOT saved
+    here, so a credential never ends up sitting in a plain file on disk."""
+    if not SETTINGS_PATH.exists():
+        return {}
+    with open(SETTINGS_PATH) as f:
+        return json.load(f)
+
+
+def save_settings(settings: dict) -> None:
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    with open(SETTINGS_PATH, "w") as f:
+        json.dump(settings, f, indent=2)
 
 
 def load_base_resume() -> dict:

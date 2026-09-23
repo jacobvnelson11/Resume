@@ -1,6 +1,7 @@
 output/
 data/seen_jobs.json
 data/current_batch.json
+data/settings.json
 __pycache__/
 *.pyc
 .venv/
