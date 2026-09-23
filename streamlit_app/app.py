@@ -162,7 +162,7 @@ if st.button("🔍 Find new jobs", type="primary"):
     base = storage.load_base_resume()
     company_tokens = [t.strip() for t in company_tokens_input.split(",") if t.strip()]
 
-    with st.spinner("Searching Remotive" + (f", and {len(company_tokens)} compan{'y' if len(company_tokens) == 1 else 'ies'}" if company_tokens else "") + "..."):
+    with st.spinner("Searching Remotive, Himalayas, The Muse" + (f", and {len(company_tokens)} compan{'y' if len(company_tokens) == 1 else 'ies'}" if company_tokens else "") + "..."):
         all_jobs = job_sources.fetch_all_jobs(company_tokens)
 
     candidates = []

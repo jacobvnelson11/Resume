@@ -257,6 +257,107 @@ def fetch_remotive_jobs() -> list[dict]:
     return jobs
 
 
+def fetch_himalayas_jobs() -> list[dict]:
+    """Himalayas' public jobs feed -- remote-only by definition. Field names
+    below are best-effort since there's no way to verify the live schema from
+    this sandbox (outbound network is blocked here); a mismatch just
+    contributes 0 jobs rather than breaking anything. Test on your own
+    machine and report back what actually comes through."""
+    try:
+        resp = requests.get("https://himalayas.app/jobs/api?limit=100", timeout=15)
+        resp.raise_for_status()
+    except Exception as e:
+        print(f"[himalayas] fetch failed: {e}")
+        return []
+
+    data = _json(resp)
+    raw_jobs = data.get("jobs", data) if isinstance(data, dict) else data
+    if not isinstance(raw_jobs, list):
+        return []
+
+    jobs = []
+    for job in raw_jobs:
+        if not isinstance(job, dict):
+            continue
+        title = job.get("title") or job.get("jobTitle")
+        if not title:
+            continue
+
+        company_field = job.get("company")
+        company = job.get("companyName") or (company_field.get("name") if isinstance(company_field, dict) else company_field)
+
+        url = job.get("applicationLink") or job.get("url") or job.get("link")
+        job_id = job.get("guid") or job.get("id") or url
+        if not job_id or not url:
+            continue
+
+        salary_raw = job.get("minSalary") or job.get("salaryMin")
+        try:
+            salary_min = int(salary_raw) if salary_raw else None
+        except (TypeError, ValueError):
+            salary_min = None
+
+        jobs.append(
+            {
+                "external_id": str(job_id),
+                "title": title,
+                "company": company or "Unknown",
+                "source": "himalayas",
+                "url": url,
+                "remote_text": "remote",
+                "description": strip_html(job.get("description") or job.get("excerpt") or ""),
+                "salary_min": salary_min,
+                "posted_at": job.get("pubDate") or job.get("publishedAt"),
+            }
+        )
+    return jobs
+
+
+def fetch_themuse_jobs() -> list[dict]:
+    """The Muse's public jobs API -- no key required, listings link to the
+    company's own posting page (refs.landing_page). Not remote-only, so real
+    remote filtering still happens downstream via scoring.is_remote()."""
+    jobs = []
+    for category in ["Sales", "Marketing"]:
+        for page in range(3):
+            try:
+                resp = requests.get(
+                    f"https://www.themuse.com/api/public/jobs?category={category}&page={page}",
+                    timeout=15,
+                )
+                resp.raise_for_status()
+            except Exception as e:
+                print(f"[themuse] category '{category}' page {page} fetch failed: {e}")
+                break
+
+            data = _json(resp)
+            results = data.get("results") or []
+            if not results:
+                break
+
+            for job in results:
+                landing_page = (job.get("refs") or {}).get("landing_page")
+                if not landing_page:
+                    continue
+                locations = job.get("locations") or []
+                location_text = ", ".join(loc.get("name", "") for loc in locations if isinstance(loc, dict))
+
+                jobs.append(
+                    {
+                        "external_id": str(job.get("id")),
+                        "title": job.get("name", ""),
+                        "company": (job.get("company") or {}).get("name", "Unknown"),
+                        "source": "themuse",
+                        "url": landing_page,
+                        "remote_text": location_text,
+                        "description": strip_html(job.get("contents") or ""),
+                        "salary_min": None,
+                        "posted_at": job.get("publication_date"),
+                    }
+                )
+    return jobs
+
+
 def fetch_jobicy_jobs() -> list[dict]:
     """Jobicy is a free, no-key, remote-only job board with its own marketing/
     sales/business industry tags -- another source of real volume alongside
@@ -319,6 +420,8 @@ def fetch_all_jobs(company_tokens: list[str]) -> list[dict]:
     # Jobicy's own job page, not straight to the company's application, which
     # is the same one-extra-hop problem WWR had. fetch_jobicy_jobs() stays
     # defined below in case a direct-apply field shows up in their API later.
+    jobs += fetch_himalayas_jobs()
+    jobs += fetch_themuse_jobs()
 
     # Company name -> tried against all three ATS platforms, since we don't
     # know upfront which one (if any) a given company uses. Each is the
