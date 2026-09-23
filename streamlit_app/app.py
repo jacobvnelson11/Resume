@@ -177,6 +177,8 @@ if st.button("🔍 Find new jobs", type="primary"):
             continue
         if scoring.is_region_restricted(job["title"]):
             continue
+        if not scoring.is_english(f"{job['title']} {job['description']}"):
+            continue
         if not scoring.is_recent(job.get("posted_at"), max_post_age_hours):
             continue
         tier = scoring.classify_tier(job["title"])

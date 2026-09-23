@@ -59,6 +59,27 @@ REGION_RESTRICTED_RE = re.compile(
 def is_region_restricted(title: str) -> bool:
     return bool(REGION_RESTRICTED_RE.search(title or ""))
 
+
+# Common English function words. A real English job posting will use several
+# of these many times over; non-English text (Portuguese, Spanish, German,
+# etc.) essentially never will. No language-detection library needed -- this
+# catches non-English listings from global boards like Himalayas regardless
+# of which language, not just the ones we happened to think to name.
+ENGLISH_STOPWORDS = {
+    "the", "and", "for", "with", "you", "our", "are", "this", "that", "will",
+    "have", "your", "from", "team", "work", "role", "about", "experience",
+    "we", "to", "of", "in", "on", "a", "is", "as", "be", "or", "an",
+}
+
+
+def is_english(text: str) -> bool:
+    words = re.findall(r"[a-zA-Z']+", (text or "").lower())
+    if len(words) < 15:
+        return True  # too little text to judge reliably -- don't exclude on a guess
+    stopword_hits = sum(1 for w in words if w in ENGLISH_STOPWORDS)
+    return (stopword_hits / len(words)) >= 0.08
+
+
 # Matches phrases like "5+ years of experience", "3-5 years experience", "7 years exp."
 MIN_YEARS_RE = re.compile(
     r"(\d{1,2})\s*\+?\s*(?:-\s*\d{1,2}\s*)?\+?\s*years?\s*(?:of\s+)?(?:relevant\s+|professional\s+)?(?:experience|exp\.?)\b",
