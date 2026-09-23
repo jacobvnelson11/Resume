@@ -219,7 +219,10 @@ def fetch_all_jobs(greenhouse_tokens: list[str]) -> list[dict]:
     # defeats the point. fetch_weworkremotely_jobs() is left in place below in
     # case that changes, but it's not called here.
     jobs += fetch_remotive_jobs()
-    jobs += fetch_jobicy_jobs()
+    # Jobicy dropped out too per Jacob's report: its "url" field links to
+    # Jobicy's own job page, not straight to the company's application, which
+    # is the same one-extra-hop problem WWR had. fetch_jobicy_jobs() stays
+    # defined below in case a direct-apply field shows up in their API later.
     for token in greenhouse_tokens:
         jobs += fetch_greenhouse_jobs(token)
 
