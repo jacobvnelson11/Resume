@@ -160,6 +160,57 @@ def fetch_remotive_jobs() -> list[dict]:
     return jobs
 
 
+def fetch_jobicy_jobs() -> list[dict]:
+    """Jobicy is a free, no-key, remote-only job board with its own marketing/
+    sales/business industry tags -- another source of real volume alongside
+    Remotive, since RemoteOK's firehose is mostly unrelated tech roles."""
+    jobs = []
+    for tag in ["marketing", "sales", "business"]:
+        try:
+            resp = requests.get(
+                f"https://jobicy.com/api/v2/remote-jobs?count=50&tag={tag}",
+                timeout=15,
+            )
+            resp.raise_for_status()
+        except Exception as e:
+            print(f"[jobicy] tag '{tag}' fetch failed: {e}")
+            continue
+
+        data = _json(resp)
+        for job in data.get("jobs", []):
+            salary_min = None
+            for field in ("annualSalaryMin", "jobSalary"):
+                val = job.get(field)
+                if val is None:
+                    continue
+                m = re.search(r"(\d{2,3}),?(\d{3})", str(val))
+                if m:
+                    salary_min = int(m.group(1) + m.group(2))
+                    break
+                elif isinstance(val, (int, float)) and val > 1000:
+                    salary_min = int(val)
+                    break
+
+            job_id = job.get("id")
+            if not job_id or not job.get("jobTitle"):
+                continue
+
+            jobs.append(
+                {
+                    "external_id": str(job_id),
+                    "title": job["jobTitle"],
+                    "company": job.get("companyName", "Unknown"),
+                    "source": "jobicy",
+                    "url": job.get("url"),
+                    "remote_text": "remote",
+                    "description": strip_html(job.get("jobDescription") or job.get("jobExcerpt") or ""),
+                    "salary_min": salary_min,
+                    "posted_at": job.get("pubDate"),
+                }
+            )
+    return jobs
+
+
 def fetch_all_jobs(greenhouse_tokens: list[str]) -> list[dict]:
     jobs = []
     jobs += fetch_remoteok_jobs()
@@ -168,6 +219,7 @@ def fetch_all_jobs(greenhouse_tokens: list[str]) -> list[dict]:
     # defeats the point. fetch_weworkremotely_jobs() is left in place below in
     # case that changes, but it's not called here.
     jobs += fetch_remotive_jobs()
+    jobs += fetch_jobicy_jobs()
     for token in greenhouse_tokens:
         jobs += fetch_greenhouse_jobs(token)
 

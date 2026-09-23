@@ -151,7 +151,7 @@ if st.button("🔍 Find new jobs", type="primary"):
     base = storage.load_base_resume()
     greenhouse_tokens = [t.strip() for t in greenhouse_tokens_input.split(",") if t.strip()]
 
-    with st.spinner("Searching RemoteOK, Remotive" + (", and Greenhouse" if greenhouse_tokens else "") + "..."):
+    with st.spinner("Searching RemoteOK, Remotive, Jobicy" + (", and Greenhouse" if greenhouse_tokens else "") + "..."):
         all_jobs = job_sources.fetch_all_jobs(greenhouse_tokens)
 
     candidates = []
