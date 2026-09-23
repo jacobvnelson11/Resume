@@ -80,6 +80,14 @@ greenhouse_tokens_input = st.sidebar.text_input(
     value="",
     help='Comma-separated Greenhouse board tokens, e.g. "gitlab, doist". Found in a company\'s careers URL: boards.greenhouse.io/<token>',
 )
+max_post_age_hours = st.sidebar.number_input(
+    "Only show jobs posted within this many hours",
+    min_value=1,
+    max_value=720,
+    value=72,
+    step=1,
+    help="Postings with no usable date from the source are kept regardless, rather than dropped.",
+)
 
 st.sidebar.divider()
 st.sidebar.subheader("Job history")
@@ -165,6 +173,8 @@ if st.button("🔍 Find new jobs", type="primary"):
         if not scoring.is_remote(job["remote_text"], job["description"]):
             continue
         if scoring.is_region_restricted(job["title"]):
+            continue
+        if not scoring.is_recent(job.get("posted_at"), max_post_age_hours):
             continue
         tier = scoring.classify_tier(job["title"])
         if tier == "excluded":

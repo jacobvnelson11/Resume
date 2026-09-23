@@ -1,5 +1,8 @@
 """Fit tiering and scoring, ported from the PRD's section 4 keyword sets."""
 import re
+from datetime import datetime, timezone
+
+from dateutil import parser as date_parser
 
 STRONG_MARKETING_TITLE_KEYWORDS = [
     "digital marketing specialist",
@@ -136,3 +139,20 @@ def compute_fit_score(description: str, tier: str, base_skills, salary_min, sala
         score += 5
 
     return max(0, min(100, score))
+
+
+def is_recent(posted_at, max_age_hours: int) -> bool:
+    """True if posted_at parses to within the last max_age_hours. A posting
+    with no usable date is kept rather than dropped -- excluding it would
+    otherwise wipe out any source that just doesn't report a clean date,
+    which isn't the same thing as the posting being stale."""
+    if not posted_at:
+        return True
+    try:
+        dt = date_parser.parse(str(posted_at))
+    except (ValueError, OverflowError, TypeError):
+        return True
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    age = datetime.now(timezone.utc) - dt
+    return age.total_seconds() <= max_age_hours * 3600
