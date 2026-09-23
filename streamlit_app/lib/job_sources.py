@@ -149,13 +149,26 @@ def fetch_remoteok_jobs() -> list[dict]:
     for job in data:
         if not job.get("id") or not job.get("position") or job.get("legal"):
             continue
+
+        raw_url = job.get("url") or ""
+        if raw_url.startswith("http://") or raw_url.startswith("https://"):
+            # RemoteOK sometimes returns an already-complete URL (occasionally
+            # the company's own apply link) instead of a relative path --
+            # blindly prepending the domain onto that produced broken URLs
+            # like "https://remoteok.comhttps://...".
+            job_url = raw_url
+        elif raw_url:
+            job_url = f"https://remoteok.com{raw_url}"
+        else:
+            job_url = f"https://remoteok.com/remote-jobs/{job['id']}"
+
         jobs.append(
             {
                 "external_id": str(job["id"]),
                 "title": job["position"],
                 "company": job.get("company", "Unknown"),
                 "source": "remoteok",
-                "url": f"https://remoteok.com{job['url']}" if job.get("url") else f"https://remoteok.com/remote-jobs/{job['id']}",
+                "url": job_url,
                 "remote_text": "remote",
                 "description": f"{job.get('description', '')} {', '.join(job.get('tags', []))}".strip(),
                 # RemoteOK returns 0 (not null) for "salary not disclosed" -- treat that as unknown,
