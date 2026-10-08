@@ -9,7 +9,7 @@ from reportlab.pdfgen import canvas
 MARGIN = 54
 PAGE_W, PAGE_H = LETTER
 CONTENT_W = PAGE_W - 2 * MARGIN
-CONTACT_LINE = "Jacob V. Nelson | Richmond, VA (Remote) | jacob.v.nelson11@gmail.com"
+CONTACT_LINE = "Jacob V. Nelson | Richmond, VA | (207) 347-0505 | jacob.v.nelson11@gmail.com | linkedin.com/in/jacob-nelson-24a794302"
 
 
 def _wrap(text: str, font: str, size: float, max_width: float) -> list[str]:
@@ -46,7 +46,7 @@ class _Flow:
         self.y -= 6
         self.c.setLineWidth(0.75)
         self.c.line(MARGIN, self.y, PAGE_W - MARGIN, self.y)
-        self.y -= 14
+        self.y -= 10
 
     def title(self, text: str, size: float = 16) -> None:
         self._ensure_space(size + 6)
@@ -85,22 +85,22 @@ def render_resume_pdf(path: str, tailored: dict, skills: list[str], certificatio
 
     f.heading("Summary")
     f.paragraph(tailored["summary"])
-    f.spacer(6)
+    f.spacer(4)
 
     f.heading("Experience")
     for role in tailored["experience"]:
         f.paragraph(f"{role['title']} - {role['company']}", bold=True)
         for bullet in role["bullets"]:
             f.bullet(bullet)
-        f.spacer(6)
+        f.spacer(4)
 
     f.heading("Skills")
     f.paragraph(", ".join(skills))
-    f.spacer(6)
+    f.spacer(4)
 
     f.heading("Certifications")
     f.paragraph(", ".join(certifications))
-    f.spacer(6)
+    f.spacer(4)
 
     f.heading("Education")
     for edu in education:

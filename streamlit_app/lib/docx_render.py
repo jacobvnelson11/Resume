@@ -3,7 +3,7 @@ import datetime
 
 from docx import Document
 
-CONTACT_LINE = "Jacob V. Nelson | Richmond, VA (Remote) | jacob.v.nelson11@gmail.com"
+CONTACT_LINE = "Jacob V. Nelson | Richmond, VA | (207) 347-0505 | jacob.v.nelson11@gmail.com | linkedin.com/in/jacob-nelson-24a794302"
 
 
 def render_resume_docx(path: str, tailored: dict, skills: list[str], certifications: list[str], education: list[dict]) -> None:

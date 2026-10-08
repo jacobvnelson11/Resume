@@ -1,68 +1,113 @@
 {
-  "summary": "Marketing and sales professional with experience across digital marketing, marketing automation, social media, and B2B sales. Combines hands-on campaign execution (HubSpot, Salesforce, GA4, Meta Ads, Mailchimp) with consultative B2B selling and team coaching experience. Seeking remote roles in digital marketing, marketing automation, or B2B/inside sales.",
+  "summary": "Marketing and sales professional with experience in digital marketing, B2B sales, customer relationship management, team leadership, and marketing analytics. Experienced in developing content, managing campaigns, analyzing performance, and using customer and market insights to improve results. Hands-on experience with HubSpot, Salesforce, Google Analytics 4, Google Ads, Meta Ads Manager, WordPress, Mailchimp, and Adobe tools, supported by recent certifications in digital marketing, e-commerce, marketing automation, and Salesforce.",
   "experience": [
     {
       "company": "HERC Rentals",
       "title": "Sales Representative",
-      "startDate": "2024-06",
+      "startDate": "2026-06",
       "endDate": null,
       "bullets": [
-        "Manage a B2B sales pipeline for construction and industrial equipment rentals, from prospecting through close, using Salesforce CRM to track opportunities and forecast revenue.",
-        "Run consultative sales conversations with facilities, construction, and operations buyers to match equipment solutions to project requirements.",
-        "Build and maintain relationships with repeat commercial accounts to drive renewal and expansion revenue.",
-        "Coordinate with fleet and operations teams to ensure on-time equipment delivery and resolve customer issues."
+        "Drive revenue growth through B2B prospecting, customer relationship development, and consultative equipment sales.",
+        "Generate qualified leads through proactive outreach, identifying customer needs and opportunities for account growth.",
+        "Strengthen customer retention through responsive service and cross-functional collaboration that improves the customer experience."
       ]
     },
     {
       "company": "Northeast Alliance",
       "title": "Product Marketing Manager",
-      "startDate": "2023-01",
-      "endDate": "2024-05",
+      "startDate": "2024-05",
+      "endDate": "2026-05",
       "bullets": [
-        "Led product marketing strategy and go-to-market messaging, coordinating cross-functional input from sales and leadership.",
-        "Coached and led a team on sales enablement content and positioning, improving team-wide messaging consistency.",
-        "Partnered with sales leadership to translate product positioning into sales coaching materials and talk tracks."
+        "Managed and coached a high-performing sales and advertising team across multiple markets, driving revenue growth and stronger team performance.",
+        "Supported recruiting, onboarding, and professional development while implementing coaching strategies to improve productivity and goal attainment.",
+        "Analyzed sales metrics, market trends, and competitor activity to optimize outreach and identify new business opportunities."
       ]
     },
     {
-      "company": "Enso Media",
+      "company": "Enso Media Firm",
       "title": "Social Media Marketing & Sales",
-      "startDate": "2021-06",
-      "endDate": "2022-12",
+      "startDate": "2023-03",
+      "endDate": "2024-04",
       "bullets": [
-        "Planned and executed paid and organic social campaigns using Meta Ads Manager, tracking performance in Google Analytics 4.",
-        "Produced content and campaign creative using Canva, Adobe Photoshop, and CapCut for client social channels.",
-        "Managed client-facing sales conversations for social media marketing packages, from pitch to close."
+        "Increased social media engagement by 30%+ through strategic content planning, audience targeting, and consistent brand messaging.",
+        "Developed digital marketing content using Canva, Adobe Photoshop, and CapCut across multiple social platforms.",
+        "Monitored campaign KPIs and marketing analytics to optimize performance, refine messaging, and improve ROI.",
+        "Collaborated with clients to develop marketing strategies aligned with business objectives and target audiences."
       ]
     },
     {
-      "company": "Virginia Commonwealth University",
+      "company": "Virginia Commonwealth University - Facilities Management",
       "title": "Marketing Intern",
-      "startDate": "2020-09",
-      "endDate": "2021-05",
+      "startDate": "2021",
+      "endDate": "2022",
       "bullets": [
-        "Supported campus marketing campaigns across email (Mailchimp) and web (WordPress) channels.",
-        "Assisted with content creation and campaign coordination for university marketing initiatives."
+        "Created marketing flyers and promotional materials supporting internal communications and department initiatives.",
+        "Processed invoices and assisted with administrative tasks to keep departmental operations organized and on track.",
+        "Supported day-to-day marketing and administrative needs while collaborating with Facilities Management staff."
       ]
     }
   ],
   "skills": [
+    "Digital Marketing",
+    "Content Marketing",
+    "Social Media Marketing",
+    "Brand Development",
+    "Campaign Management",
+    "Audience Targeting",
+    "Marketing Analytics",
+    "Campaign Optimization",
+    "Market Research",
+    "Competitive Analysis",
+    "SEO",
     "HubSpot",
     "Salesforce",
+    "Salesforce Marketing Cloud",
     "Google Analytics 4",
     "Google Ads",
     "Meta Ads Manager",
     "Mailchimp",
+    "Hootsuite",
     "WordPress",
     "Canva",
     "Adobe Photoshop",
-    "CapCut"
+    "CapCut",
+    "Microsoft Office",
+    "AI Prompting",
+    "B2B Sales",
+    "Consultative Selling",
+    "Lead Generation",
+    "Prospecting",
+    "Cold Calling",
+    "Account Management",
+    "CRM",
+    "Customer Retention",
+    "Pipeline Management",
+    "Revenue Growth",
+    "Upselling & Cross-Selling",
+    "Negotiation",
+    "Team Leadership",
+    "Sales Coaching",
+    "Recruiting",
+    "Onboarding",
+    "Training & Development",
+    "Cross-Functional Collaboration",
+    "Communication",
+    "Presentation",
+    "Problem Solving",
+    "Strategic Thinking",
+    "Data Analysis"
   ],
   "certifications": [
-    "Google Digital Marketing & E-commerce Professional Certificate",
-    "Adobe Digital Marketing",
-    "Salesforce Marketing Cloud Integration Essentials",
-    "HubSpot/Coursera Marketing Automation"
+    "Google Digital Marketing & E-commerce Professional Certificate (Google)",
+    "Make the Sale: Build, Launch, and Manage E-commerce Stores (Google)",
+    "From Likes to Leads: Interact with Customers Online (Google)",
+    "Foundations of Digital Marketing and E-commerce (Google)",
+    "Digital Marketing (Adobe)",
+    "Marketing Automation with AI and HubSpot: Plan to Execution (Coursera)",
+    "Salesforce Marketing Cloud Integration Essentials (Coursera)",
+    "Salesforce Sales and CRM Overview (Coursera)",
+    "International Marketing Course (Virginia Commonwealth University)",
+    "Business Etiquette (LinkedIn)"
   ],
   "education": [
     {
